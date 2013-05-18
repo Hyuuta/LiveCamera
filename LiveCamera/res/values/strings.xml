@@ -1,0 +1,12 @@
+<resources>
+
+    <string name="app_name">LiveCamera</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="ui_main_lbl_prefix">Prefix</string>
+    <string name="ui_main_btn_start">Start</string>
+    <string name="ui_main_btn_end">End</string>
+    <string name="ui_main_btn_prefix_curdatetime">Cur.DateAndTime</string>
+    <string name="ui_main_btn_prefix_clear">Clear</string>
+
+</resources>
