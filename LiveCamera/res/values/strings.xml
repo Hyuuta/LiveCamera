@@ -8,5 +8,6 @@
     <string name="ui_main_btn_end">End</string>
     <string name="ui_main_btn_prefix_curdatetime">Cur.DateAndTime</string>
     <string name="ui_main_btn_prefix_clear">Clear</string>
+    <string name="ui_main_btn_preview">Preview</string>
 
 </resources>

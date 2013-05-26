@@ -7,44 +7,51 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.database.DataSetObserver;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.Toast;
 
 public class MainActivity extends Activity{
-
+	Button btnStart;
+	Button btnEnd;
+	Button btnAddPrefixDT;
+	Button btnClearPrefix;
+	Button btnPreview;
+	EditText edPrefix;
+	SharedPreferences pref;
+	
+	int currentStep;
+	boolean isRunning;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
 		InitLayout();
+		pref = getSharedPreferences("LiveCamera", MODE_PRIVATE);
+		
+		readState(pref);
 		
 	}
-	
-	private void StartIntervalShutter(){
-		Intent serviceIntent = new Intent(this, MainActivity.class);
-		PendingIntent pendingIntent
-		        = PendingIntent.getService(this, 0, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-		am.setInexactRepeating (
-		        AlarmManager.RTC,
-		        System.currentTimeMillis(),
-		        //AlarmManager.INTERVAL_HOUR,
-		        AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-		        pendingIntent);
-	}
-	
-	
+
 	private void InitLayout(){
-		final Button btnStart = (Button)findViewById(R.id.main_btnStart);
-		final Button btnEnd = (Button)findViewById(R.id.main_btnEnd);
-		final Button btnAddPrefixDT = (Button)findViewById(R.id.main_btnPrefixCurDT);
-		final Button btnClearPrefix = (Button)findViewById(R.id.main_btnPrefixClear);
-		final EditText edPrefix = (EditText)findViewById(R.id.main_txtPrefix);
+		btnStart = (Button)findViewById(R.id.main_btnStart);
+		btnEnd = (Button)findViewById(R.id.main_btnEnd);
+		btnAddPrefixDT = (Button)findViewById(R.id.main_btnPrefixCurDT);
+		btnClearPrefix = (Button)findViewById(R.id.main_btnPrefixClear);
+		btnPreview = (Button)findViewById(R.id.main_btnPreview);
+		
+		edPrefix = (EditText)findViewById(R.id.main_txtPrefix);
+		
 		
 		btnStart.setOnClickListener(new OnClickListener(){@Override
 		public void onClick(View v) {
@@ -71,13 +78,58 @@ public class MainActivity extends Activity{
 		btnClearPrefix.setOnClickListener(new OnClickListener(){public void onClick(View v) {
 			edPrefix.setText("");
 		}});
+		
+		
+		btnPreview.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				//TODO
+				launchPreview();
+				;
+			}
+		});
+
+
+	}
+	
+	private void launchPreview(){
+		Intent intent = new Intent(this, CameraViewActivity.class);
+		startActivity(intent);
+	}
+	
+	private void readState(SharedPreferences pref) {
+		// TODO Auto-generated method stub
+		isRunning =pref.getBoolean("isRunning", false); 
+		btnStart.setEnabled(!isRunning);
+		btnEnd.setEnabled(isRunning);
+		btnAddPrefixDT.setEnabled(!isRunning);
+		btnClearPrefix.setEnabled(!isRunning);
+		
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+	private void startIntervalShutter(){
+		Intent serviceIntent = new Intent(this, LaunchCameraReceiver.class);
+		PendingIntent pendingIntent
+		        = PendingIntent.getService(this, 0, serviceIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+		am.setInexactRepeating (
+		        AlarmManager.RTC,
+		        System.currentTimeMillis(),
+		        //AlarmManager.INTERVAL_HOUR,
+		        AlarmManager.INTERVAL_FIFTEEN_MINUTES,
+		        pendingIntent);
 	}
+	
+	@Override
+	protected void onStop(){
+		super.onStop();
+		Editor ed = pref.edit();
+		ed.putBoolean(AppKey.ISRUN, isRunning);
+		ed.commit();
+		
+	}
+	
+
+
 
 }
